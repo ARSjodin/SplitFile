@@ -1,0 +1,38 @@
+# set working directory to folder where large dataset is
+## this will also be the folder where all the smaller subsets are saved
+
+# make sure index and skips are set to zero BEFORE you run the code starting with
+## repeat{}
+## otherwise it will miss the first part of your datafile
+
+
+index <- 0
+chunks <- 1000000 # how many rows do you want in your dataset
+skips <- 0
+
+# code will repeat the following:
+## load in a subset of the huge data file 
+## save the subset into the folder where the huge file is
+## repeat over and over moving through the rows of your huge document
+repeat{
+  dataChunk <- read.table("large_dataset.txt", nrows = chunks, #the first item is the name of entire large file here
+                          # code then splits it into pieces the length that you've defined chunks above
+                          skip = skips, header = F) # it will then skip the ones it's already done - MAKE SURE SKIPS = 0 TO BEGIN
+                          # if your large dataset has column headers, can say header = T
+  
+  colnames(dataChunk) <- c("NCOMM", "NSP", "M(T)", "E(T)", "M(P)", "E(P)", "REDUN") # names your columns
+  # colnames() is unnecessary if header = T above in read.table()
+  
+  write.csv(dataChunk, file = paste0("large_dataset_subset", index, ".csv")) # writes a new csv file - can change file name within first "", 
+  # can change document type within the second "", just change to .txt, etc.
+  # index part puts a unique ID # for each document you are saving
+  
+  if(nrow(dataChunk) < chunks){ # this says, if you get to the point where you're at the end, stop
+    # end is defined as the subset left being shorter than the number of rows you defined in chunks
+    break
+  }
+  
+  index <- index + 1 # this will move along and change the name of your new, subsetted document saved in the working directory
+  
+  skips <- chunks*index # this will make sure you don't repeat the rows in the huge dataset that you've already used
+}
